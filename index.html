@@ -8,25 +8,17 @@
         :root { --bg: #0a0a0c; --card: #16161a; --accent: #00f2ff; --text: #ffffff; --done: #00ff88; }
         body { background: var(--bg); color: var(--text); font-family: 'Courier New', Courier, monospace; margin: 0; padding: 10px; display: flex; justify-content: center; }
         .container { width: 100%; max-width: 450px; padding-bottom: 50px; }
-        
         header { border: 3px solid var(--accent); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; background: #000; box-shadow: 0 0 15px var(--accent); }
         .level-badge { background: var(--accent); color: #000; font-weight: bold; padding: 2px 10px; border-radius: 5px; font-size: 0.8rem; }
-        
-        /* Navegação de Dias */
         .nav-days { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 10px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; }
-        .nav-btn { background: none; border: 1px solid var(--accent); color: var(--accent); font-size: 1.2rem; cursor: pointer; border-radius: 5px; padding: 5px 15px; transition: 0.3s; }
-        .nav-btn:active { background: var(--accent); color: #000; }
+        .nav-btn { background: none; border: 1px solid var(--accent); color: var(--accent); font-size: 1.2rem; cursor: pointer; border-radius: 5px; padding: 5px 15px; }
         #current-day-display { font-weight: bold; font-size: 0.9rem; color: var(--accent); letter-spacing: 1px; }
-
-        .stats-row { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.7rem; color: var(--accent); }
         .card { background: var(--card); border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
         h2 { font-size: 0.8rem; margin: 0 0 10px 0; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        
         .quest-item { background: #222; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid var(--accent); cursor: pointer; }
         .quest-item.done { border-left-color: var(--done); opacity: 0.4; background: #111; }
         .quest-info { display: block; font-size: 0.85rem; font-weight: bold; }
         .quest-sub { font-size: 0.7rem; color: #aaa; }
-
         .progress-bar { background: #333; height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
         .progress-fill { background: var(--done); height: 100%; width: 0%; transition: 0.5s; }
         .weight-input { background: none; border: none; border-bottom: 1px solid var(--accent); color: #fff; width: 50px; text-align: center; font-family: inherit; font-size: 1rem; }
@@ -36,12 +28,11 @@
 
 <div class="container">
     <header>
-        <span class="level-badge">RYAN ELITE v4.0</span>
+        <span class="level-badge">RYAN ELITE v5.1</span>
         <h1 style="margin: 10px 0; font-size: 1.5rem;">MISSION CONTROL</h1>
-        <div class="stats-row">
-            <span>HP: 100/100</span>
-            <span>PESO: <input type="number" id="w-input" class="weight-input" step="0.1" onchange="saveW()"> KG</span>
+        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--accent);">
             <span>XP: <span id="xp-val">0</span></span>
+            <span>PESO: <input type="number" id="w-input" class="weight-input" step="0.1" onchange="saveW()"> KG</span>
         </div>
         <div class="progress-bar"><div id="p-fill" class="progress-fill"></div></div>
     </header>
@@ -53,55 +44,90 @@
     </div>
 
     <div class="card">
-        <h2>🥗 DIETA (BAIXO CUSTO)</h2>
+        <h2>🥗 MENU DO DIA (PESO EXATO EM GRAMAS)</h2>
         <div id="diet-quests"></div>
     </div>
 
-    <div class="card" id="gym-section">
+    <div class="card">
         <h2>🏋️ ACADEMIA (60 MIN)</h2>
         <div id="gym-quests"></div>
     </div>
 
     <div class="card">
-        <h2>💧 HIDRATAÇÃO</h2>
+        <h2>💧 HIDRATAÇÃO (3000ml)</h2>
         <div class="quest-item" id="water-q" onclick="toggleWater()">
-            <span class="quest-info">BEBER 3L DE ÁGUA</span>
-            <span id="water-status" class="quest-sub">Status: 0/5 Garrafas</span>
+            <span class="quest-info">BEBER ÁGUA</span>
+            <span id="water-status" class="quest-sub">Status: 0/5 Garrafas de 600ml</span>
         </div>
     </div>
-
-    <button style="width:100%; padding:10px; background:none; border:1px solid #444; color:#444; border-radius:10px; font-size:0.6rem; cursor:pointer;" onclick="resetQuests()">LIMPAR TUDO (RESET)</button>
 </div>
 
 <script>
     const diasSemana = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
     let dayIndex = new Date().getDay();
 
-    const questsDiet = [
-        {t: "CAFÉ", d: "2 Ovos + 1 fatia Pão/Cuscuz + 1 Fruta"},
-        {t: "ALMOÇO", d: "3 col. Arroz + 1 concha Feijão + 120g Frango + Salada"},
-        {t: "LANCHE", d: "1 Iogurte + 2 col. Aveia"},
-        {t: "JANTAR", d: "100g Proteína + Legumes Livres"}
+    const cardapios = [
+        [ // Domingo
+            {t: "CAFÉ", d: "100g de Ovos (2-3 unid) + 80g de Mamão"},
+            {t: "ALMOÇO", d: "100g de Frango + 100g de Batata Doce + Salada Livre"},
+            {t: "LANCHE", d: "120g de Maçã + 170g de Iogurte Natural"},
+            {t: "JANTAR", d: "100g de Omelete + 100g de Abóbora ou Legumes"}
+        ],
+        [ // Segunda
+            {t: "CAFÉ", d: "100g de Ovos + 25g de Pão Integral (1 fatia)"},
+            {t: "ALMOÇO", d: "120g de Frango + 80g de Arroz + 50g de Feijão"},
+            {t: "LANCHE", d: "80g de Banana + 30g de Aveia em Flocos"},
+            {t: "JANTAR", d: "120g de Frango + 200g de Salada Mix"}
+        ],
+        [ // Terça
+            {t: "CAFÉ", d: "100g de Ovos + 40g de Cuscuz (pesado cozido)"},
+            {t: "ALMOÇO", d: "120g de Patinho Moído + 100g de Macarrão Integral Cozido"},
+            {t: "LANCHE", d: "170g de Iogurte Natural + 100g de Morangos"},
+            {t: "JANTAR", d: "120g de Patinho Moído + 150g de Brócolis/Cenoura"}
+        ],
+        [ // Quarta
+            {t: "CAFÉ", d: "100g de Ovos + 25g de Pão Integral"},
+            {t: "ALMOÇO", d: "120g de Frango + 120g de Batata Inglesa Cozida"},
+            {t: "LANCHE", d: "80g de Banana + 15g de Pasta de Amendoim"},
+            {t: "JANTAR", d: "100g de Omelete + 200g de Legumes Verdes"}
+        ],
+        [ // Quinta
+            {t: "CAFÉ", d: "100g de Ovos + 100g de Melancia"},
+            {t: "ALMOÇO", d: "120g de Frango + 80g de Arroz + 50g de Feijão"},
+            {t: "LANCHE", d: "170g de Iogurte Natural + 30g de Aveia em Flocos"},
+            {t: "JANTAR", d: "120g de Frango + 200g de Alface/Pepino/Tomate"}
+        ],
+        [ // Sexta
+            {t: "CAFÉ", d: "100g de Ovos + 40g de Cuscuz Cozido"},
+            {t: "ALMOÇO", d: "130g de Tilápia/Peixe + 100g de Mandioca Cozida"},
+            {t: "LANCHE", d: "120g de Maçã + 170g de Iogurte Natural"},
+            {t: "JANTAR", d: "100g de Omelete + 150g de Mix Vegetais"}
+        ],
+        [ // Sábado
+            {t: "CAFÉ", d: "100g de Ovos + 25g de Pão Integral"},
+            {t: "ALMOÇO", d: "120g de Carne Moída + 80g de Arroz + 50g de Feijão"},
+            {t: "LANCHE", d: "80g de Banana + 30g de Aveia em Flocos"},
+            {t: "JANTAR", d: "120g de Carne Moída + 200g de Salada de Repolho"}
+        ]
     ];
 
-    const gymQuests = [
-        {t: "TREINO ACADEMIA", d: "60 minutos (Musculação + Cardio)"},
-        {t: "FOCO TOTAL", d: "Zero Doces, Salgadinhos ou Refri"}
+    const gymTasks = [
+        {t: "TREINO ACADEMIA", d: "60 minutos de esforço máximo"},
+        {t: "BOSS FINAL", d: "Zero açúcar, fritura ou industrializados"}
     ];
 
     function render() {
         document.getElementById('current-day-display').innerText = diasSemana[dayIndex];
-        document.getElementById('w-input').value = localStorage.getItem('r_v4_weight') || 90;
+        document.getElementById('w-input').value = localStorage.getItem('r_v51_weight') || 90;
         
-        // Renderizar Dieta
-        document.getElementById('diet-quests').innerHTML = questsDiet.map((q, i) => `
+        let menuHoje = cardapios[dayIndex];
+        document.getElementById('diet-quests').innerHTML = menuHoje.map((q, i) => `
             <div class="quest-item ${isD('d',i)}" onclick="tog('d',${i})">
                 <span class="quest-info">${q.t}</span>
                 <span class="quest-sub">${q.d}</span>
             </div>`).join('');
 
-        // Renderizar Academia
-        document.getElementById('gym-quests').innerHTML = gymQuests.map((q, i) => `
+        document.getElementById('gym-quests').innerHTML = gymTasks.map((q, i) => `
             <div class="quest-item ${isD('g',i)}" onclick="tog('g',${i})">
                 <span class="quest-info">${q.t}</span>
                 <span class="quest-sub">${q.d}</span>
@@ -110,51 +136,32 @@
         updateProgress();
     }
 
-    function changeDay(step) {
-        dayIndex = (dayIndex + step + 7) % 7;
-        render();
-    }
-
+    function changeDay(step) { dayIndex = (dayIndex + step + 7) % 7; render(); }
     function tog(type, i) {
-        const key = `r_v4_day${dayIndex}_${type}_${i}`;
+        const key = `r_v51_d${dayIndex}_${type}_${i}`;
         localStorage.getItem(key) ? localStorage.removeItem(key) : localStorage.setItem(key, 'true');
         render();
     }
-
-    function isD(type, i) { 
-        return localStorage.getItem(`r_v4_day${dayIndex}_${type}_${i}`) ? 'done' : ''; 
-    }
-
+    function isD(type, i) { return localStorage.getItem(`r_v51_d${dayIndex}_${type}_${i}`) ? 'done' : ''; }
     function toggleWater() {
-        let count = parseInt(localStorage.getItem(`r_v4_day${dayIndex}_water`) || 0);
+        let count = parseInt(localStorage.getItem(`r_v51_d${dayIndex}_water`) || 0);
         count = (count + 1) % 6;
-        localStorage.setItem(`r_v4_day${dayIndex}_water`, count);
+        localStorage.setItem(`r_v51_d${dayIndex}_water`, count);
         render();
     }
-
     function updateProgress() {
         let done = document.querySelectorAll('.done').length;
-        let total = questsDiet.length + gymQuests.length + 1;
+        let total = cardapios[dayIndex].length + gymTasks.length + 1;
         let perc = (done / total) * 100;
         document.getElementById('p-fill').style.width = perc + "%";
         document.getElementById('xp-val').innerText = Math.floor(perc * 15);
-        
-        let wCount = localStorage.getItem(`r_v4_day${dayIndex}_water`) || 0;
+        let wCount = localStorage.getItem(`r_v51_d${dayIndex}_water`) || 0;
         document.getElementById('water-status').innerText = `Status: ${wCount}/5 Garrafas de 600ml`;
-        
         const wBtn = document.getElementById('water-q');
         wCount == 5 ? wBtn.classList.add('done') : wBtn.classList.remove('done');
     }
-
-    function saveW() { localStorage.setItem('r_v4_weight', document.getElementById('w-input').value); }
+    function saveW() { localStorage.setItem('r_v51_weight', document.getElementById('w-input').value); }
     
-    function resetQuests() { 
-        if(confirm("Isso apagará o histórico de TODOS os dias. Confirmar?")) { 
-            localStorage.clear(); 
-            location.reload(); 
-        } 
-    }
-
     window.onload = render;
 </script>
 </body>
